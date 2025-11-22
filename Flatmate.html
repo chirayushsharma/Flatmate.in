@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlatMate.in - Kolkata Edition</title>
+    
+    <!-- 1. Tailwind CSS (Styling) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. Tailwind Configuration for Custom Colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cream: '#F0EAD6',
+                        retroBlack: '#121010',
+                        retroOrange: '#FF4F00',
+                    },
+                    fontFamily: {
+                        mono: ['Courier New', 'monospace'],
+                        serif: ['Georgia', 'serif'],
+                    },
+                    animation: {
+                        'marquee': 'marquee 30s linear infinite',
+                        'spin-slow': 'spin 8s linear infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- 3. React & ReactDOM (The Engine) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "react": "https://esm.sh/react@18.2.0",
+                "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+                "lucide-react": "https://esm.sh/lucide-react@0.292.0"
+            }
+        }
+    </script>
+    
+    <!-- Babel (To understand JSX in browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F0EAD6; border-left: 2px solid black; }
+        ::-webkit-scrollbar-thumb { background: black; }
+        ::-webkit-scrollbar-thumb:hover { background: #FF4F00; }
+        body { background-color: #F0EAD6; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- 4. The Application Code -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Shield, Search, Zap, Coffee, Moon, Sun, BookOpen, Music, Lock, Heart, MapPin, Menu, X, CheckCircle, GraduationCap, MessageSquare, User, Navigation, Send, Calendar, ArrowRight, Star, Filter, Eye, Phone, ChevronRight, Terminal } from 'lucide-react';
+
+        // --- THEME CONSTANTS ---
+        const THEME = {
+            bg: "bg-cream",
+            text: "text-retroBlack",
+            borderWidth: "border-[3px]",
+            shadow: "shadow-[6px_6px_0px_0px_#000000]",
+            shadowHover: "hover:shadow-[2px_2px_0px_0px_#000000]",
+            fontHead: "font-serif",
+            fontBody: "font-mono",
+        };
+
+        // --- COMPONENTS ---
+
+        const BootScreen = ({ onComplete }) => {
+            const [lines, setLines] = useState([]);
+            const text = [
+                "INITIALIZING KERNEL...",
+                "LOADING ASSETS [||||||||||] 100%",
+                "CONNECTING TO KOLKATA NODE (SECURE)...",
+                "VERIFYING HANDSHAKE...",
+                "ACCESS GRANTED."
+            ];
+
+            useEffect(() => {
+                let delay = 0;
+                text.forEach((line, index) => {
+                    delay += Math.random() * 500 + 300;
+                    setTimeout(() => {
+                        setLines(prev => [...prev, line]);
+                        if (index === text.length - 1) {
+                            setTimeout(onComplete, 800);
+                        }
+                    }, delay);
+                });
+            }, []);
+
+            return (
+                <div className="fixed inset-0 bg-black z-[100] flex flex-col justify-end p-8 md:p-16 font-mono text-retroOrange text-sm md:text-xl uppercase tracking-widest leading-loose">
+                    {lines.map((l, i) => <div key={i}>{`> ${l}`}</div>)}
+                    <div className="animate-pulse mt-2">_</div>
+                </div>
+            );
+        };
+
+        const Toast = ({ message, onClose }) => {
+            useEffect(() => {
+                const timer = setTimeout(onClose, 3000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            return (
+                <div className={`fixed bottom-8 right-8 z-50 bg-black text-cream px-6 py-4 ${THEME.borderWidth} border-white shadow-[8px_8px_0px_0px_rgba(255,79,0,1)] animate-in slide-in-from-right fade-in duration-300 font-mono text-xs uppercase font-bold flex items-center gap-3`}>
+                    <div className="w-2 h-2 bg-retroOrange animate-pulse rounded-full"></div>
+                    {message}
+                </div>
+            );
+        };
+
+        const Button = ({ children, onClick, primary = false, className = "", icon: Icon }) => (
+            <button
+                onClick={onClick}
+                className={`
+                    px-6 py-3 font-bold text-xs md:text-sm uppercase tracking-widest transition-all transform active:translate-y-1 flex items-center justify-center gap-2
+                    ${THEME.borderWidth} border-black
+                    ${primary 
+                        ? "bg-black text-cream hover:bg-retroOrange hover:text-black hover:border-black" 
+                        : "bg-transparent text-black hover:bg-black hover:text-cream"
+                    } 
+                    ${className}
+                `}
+            >
+                {Icon && <Icon size={16} />}
+                {children}
+            </button>
+        );
+
+        const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md" }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cream/90 backdrop-blur-sm">
+                    <div className={`bg-white w-full ${maxWidth} ${THEME.borderWidth} border-black ${THEME.shadow} relative animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]`}>
+                        <div className="bg-black text-white px-4 py-3 flex justify-between items-center border-b-2 border-black shrink-0">
+                            <span className="font-mono text-xs uppercase tracking-widest flex items-center gap-2">
+                                <Terminal size={12} /> System.Display
+                            </span>
+                            <button onClick={onClose} className="hover:text-retroOrange transition-colors"><X size={20} /></button>
+                        </div>
+                        <div className="p-6 md:p-8 overflow-y-auto">
+                            <h2 className={`text-3xl ${THEME.fontHead} font-black mb-6 uppercase leading-none`}>{title}</h2>
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const AuthPage = ({ onLogin }) => (
+            <div className={`min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cream animate-in fade-in duration-500`}>
+                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+                 <div className={`bg-white ${THEME.borderWidth} border-black p-10 w-full max-w-lg ${THEME.shadow} relative z-10`}>
+                   <div className="text-center mb-10">
+                     <div className="w-16 h-16 bg-black text-cream flex items-center justify-center font-black text-3xl mx-auto mb-6 border-2 border-transparent shadow-[4px_4px_0px_0px_#FF4F00]">F</div>
+                     <h1 className={`text-5xl ${THEME.fontHead} font-black uppercase tracking-tighter mb-2`}>FlatMate<span className="text-retroOrange">.in</span></h1>
+                     <div className="h-1 w-24 bg-black mx-auto mt-4"></div>
+                     <p className="font-mono text-xs mt-4 uppercase tracking-widest text-gray-600">Secure Student Portal</p>
+                   </div>
+                   <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); onLogin(); }}>
+                     <div>
+                       <label className="block font-bold uppercase text-xs mb-2 font-mono">College Email ID</label>
+                       <input className={`w-full bg-white ${THEME.borderWidth} border-black p-4 font-mono text-sm focus:outline-none focus:bg-[#FFF9E5]`} placeholder="student@jaduniv.edu.in" />
+                     </div>
+                     <div>
+                       <label className="block font-bold uppercase text-xs mb-2 font-mono">Password</label>
+                       <input type="password" className={`w-full bg-white ${THEME.borderWidth} border-black p-4 font-mono text-sm focus:outline-none focus:bg-[#FFF9E5]`} placeholder="••••••••" />
+                     </div>
+                     <Button primary className={`w-full ${THEME.shadow}`} type="submit">Access Portal</Button>
+                   </form>
+                   <div className="mt-8 pt-6 border-t-2 border-dashed border-black text-center">
+                     <button className="font-bold font-mono text-xs uppercase border-b-2 border-black hover:bg-retroOrange hover:border-transparent transition-colors">Apply for Membership</button>
+                   </div>
+                 </div>
+            </div>
+        );
+
+        const MessagesView = () => {
+            const [messages, setMessages] = useState([
+                { id: 1, sender: "Rohan", text: "Hey! Saw you're looking for a flat in Salt Lake?", time: "10:30 AM", type: "received" },
+                { id: 2, sender: "You", text: "Yeah! Near Sector V preferably.", time: "10:32 AM", type: "sent" },
+                { id: 3, sender: "Rohan", text: "Perfect. I have a 2BHK there. Want to see pics?", time: "10:33 AM", type: "received" },
+            ]);
+            const [input, setInput] = useState("");
+
+            const handleSend = () => {
+                if(!input) return;
+                setMessages([...messages, { id: Date.now(), sender: "You", text: input, time: "Now", type: "sent" }]);
+                setInput("");
+            };
+
+            const handleMeetRequest = () => {
+                setMessages([...messages, { id: Date.now(), sender: "You", text: "Let's meet IRL to discuss? ☕", time: "Now", type: "system" }]);
+            };
+
+            return (
+                <div className="max-w-4xl mx-auto p-4 h-[calc(100vh-140px)] flex flex-col pt-12">
+                    <div className={`bg-white ${THEME.borderWidth} border-black flex-1 flex flex-col ${THEME.shadow} overflow-hidden`}>
+                        <div className="bg-black text-cream p-4 flex justify-between items-center border-b-[3px] border-black">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-retroOrange border-2 border-white overflow-hidden rounded-none">
+                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Rohan" alt="Rohan" className="mix-blend-multiply filter contrast-125" />
+                                </div>
+                                <div>
+                                    <h3 className={`font-bold uppercase text-xl ${THEME.fontHead} leading-none mb-1`}>Rohan Das</h3>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-green-500 animate-pulse"></div>
+                                        <span className="text-[10px] font-mono tracking-widest uppercase">Connected</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={handleMeetRequest} className="bg-cream text-black px-4 py-2 text-xs font-bold uppercase hover:bg-retroOrange transition-colors border-2 border-black flex items-center gap-2">
+                                <Coffee size={14} /> Meet IRL
+                            </button>
+                        </div>
+                        <div className="flex-1 p-6 overflow-y-auto space-y-6 bg-[#F3F3F3]" style={{ backgroundImage: 'radial-gradient(#d1d1d1 1px, transparent 1px)', backgroundSize: '16px 16px' }}>
+                            {messages.map((msg) => (
+                                <div key={msg.id} className={`flex ${msg.type === 'sent' || msg.type === 'system' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[80%] p-4 border-2 border-black ${THEME.shadowHover} transition-all ${
+                                        msg.type === 'sent' ? 'bg-black text-white' : 
+                                        msg.type === 'system' ? 'bg-retroOrange text-black font-bold text-center w-full' :
+                                        'bg-white text-black'
+                                    }`}>
+                                        <p className={`text-sm ${THEME.fontBody} font-medium`}>{msg.text}</p>
+                                        <span className="text-[10px] opacity-60 block text-right mt-2 font-mono uppercase tracking-wider">{msg.time}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-4 bg-white border-t-[3px] border-black flex gap-4">
+                            <input 
+                                className="flex-1 bg-cream border-2 border-black p-3 font-mono text-sm focus:outline-none"
+                                placeholder="TYPE MESSAGE..."
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                            />
+                            <button onClick={handleSend} className="bg-black text-white px-6 border-2 border-black hover:bg-retroOrange hover:text-black transition-colors active:translate-y-1">
+                                <Send size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- MAIN APP ---
+        function FlatMateApp() {
+            const [booted, setBooted] = useState(false);
+            const [currentView, setCurrentView] = useState("HOME");
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [showPaywall, setShowPaywall] = useState(false);
+            const [selectedProfile, setSelectedProfile] = useState(null);
+            const [verified, setVerified] = useState(false);
+            const [toast, setToast] = useState(null);
+            const [filter, setFilter] = useState("ALL"); 
+            const [locationFilter, setLocationFilter] = useState("ALL");
+
+            const roommates = [
+                { id: 1, name: "Arjun", age: 21, college: "Jadavpur Univ", location: "Jadavpur", rent: "₹6k", tags: ["Veg", "Early Bird"], habits: { smoke: false, drink: false, guests: "Weekends" }, img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun", bio: "Engineering. Need quiet place near 8B. I code late at night but use headphones." },
+                { id: 2, name: "Riya", age: 20, college: "St. Xaviers", location: "Park Street", rent: "₹12k", tags: ["Non-Veg", "Night Owl"], habits: { smoke: false, drink: true, guests: "Anytime" }, img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Riya", bio: "Mass Comm. Park Street area. Artsy vibes. Looking for someone who enjoys gallery hopping." },
+                { id: 3, name: "Sourav", age: 22, college: "IIM Calcutta", location: "Joka", rent: "₹15k", tags: ["Eggetarian", "MBA"], habits: { smoke: true, drink: true, guests: "Rarely" }, img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sourav", bio: "MBA. Joka or DH Road. Serious study environment needed during exam weeks." },
+                { id: 4, name: "Priti", age: 19, college: "NIFT", location: "Salt Lake", rent: "₹10k", tags: ["Veg", "Fashion"], habits: { smoke: false, drink: false, guests: "No Boys" }, img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Priti", bio: "Fashion student. Salt Lake Sec 1. Female only. I have a lot of clothes, need closet space!" },
+                { id: 5, name: "Deb", age: 23, college: "Calcutta Univ", location: "College St", rent: "₹5k", tags: ["Gamer", "Night Owl"], habits: { smoke: true, drink: false, guests: "Weekends" }, img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Deb", bio: "Coder. College St. Up late gaming. I cook great Maggi." },
+                { id: 6, name: "Ananya", age: 21, college: "Presidency", location: "College St", rent: "₹8k", tags: ["Vegan", "Reader"], habits: { smoke: false, drink: true, guests: "Anytime" }, img: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ananya", bio: "Lit major. Coffee shops. College Street. Looking for a reading buddy." },
+            ];
+
+            const showToast = (msg) => setToast(msg);
+            
+            const handleMapClick = (locationName) => {
+                setLocationFilter(locationName);
+                setCurrentView("HOME");
+                showToast(`Filtering by: ${locationName}`);
+            };
+
+            const filtered = roommates.filter(r => {
+                const matchesFilter = filter === "ALL" || 
+                    (filter === "VEG" && (r.tags.includes("Veg") || r.tags.includes("Vegan"))) ||
+                    (filter === "NIGHT" && r.tags.includes("Night Owl"));
+                const matchesLocation = locationFilter === "ALL" || r.location.includes(locationFilter);
+                return matchesFilter && matchesLocation;
+            });
+
+            if (!booted) return <BootScreen onComplete={() => setBooted(true)} />;
+
+            return (
+                <div className={`min-h-screen ${THEME.bg} ${THEME.text} selection:bg-retroOrange selection:text-black overflow-x-hidden relative`}>
+                    <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.03] mix-blend-multiply" style={{ background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))', backgroundSize: '100% 2px, 3px 100%' }}></div>
+                    
+                    {toast && <Toast message={toast} onClose={() => setToast(null)} />}
+
+                    {/* Navigation */}
+                    <nav className={`fixed w-full z-40 bg-cream border-b-[3px] border-black transition-all duration-300 ${isMenuOpen ? '' : 'shadow-sm'}`}>
+                        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+                            <div className="flex justify-between h-20 items-center">
+                                <div className="flex items-center gap-3 cursor-pointer group" onClick={() => { setCurrentView("HOME"); setLocationFilter("ALL"); }}>
+                                    <div className="w-10 h-10 bg-black text-cream flex items-center justify-center font-black text-xl border-2 border-transparent group-hover:bg-retroOrange group-hover:text-black transition-colors transform group-hover:rotate-180 duration-500">F</div>
+                                    <span className={`font-black text-2xl tracking-tighter uppercase ${THEME.fontHead}`}>FlatMate<span className="text-retroOrange">.in</span></span>
+                                </div>
+                                <div className="hidden md:flex items-center space-x-8">
+                                    <button onClick={() => { setCurrentView("HOME"); setLocationFilter("ALL"); }} className="font-bold uppercase text-xs tracking-widest hover:text-retroOrange hover:underline decoration-2 underline-offset-4">Listings</button>
+                                    <button onClick={() => setCurrentView("MAP")} className="font-bold uppercase text-xs tracking-widest hover:text-retroOrange hover:underline decoration-2 underline-offset-4">Map View</button>
+                                    <button onClick={() => setCurrentView("MESSAGES")} className="font-bold uppercase text-xs tracking-widest hover:text-retroOrange hover:underline decoration-2 underline-offset-4">Messages</button>
+                                    <Button primary onClick={() => setCurrentView("LOGIN")}>
+                                        {verified ? <span className="flex items-center gap-2"><User size={16}/> Profile</span> : "Student Login"}
+                                    </Button>
+                                </div>
+                                <div className="md:hidden">
+                                    <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2 border-2 border-black hover:bg-black hover:text-white transition-colors">
+                                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <div className="pt-20">
+                        {currentView === "LOGIN" && <AuthPage onLogin={() => { setVerified(true); setCurrentView("HOME"); showToast("Welcome back, Student"); }} />}
+                        {currentView === "MESSAGES" && <MessagesView />}
+                        {currentView === "MAP" && (
+                            <div className="max-w-7xl mx-auto p-4 md:p-8 animate-in fade-in zoom-in duration-300">
+                                <div className={`bg-black text-cream p-6 ${THEME.borderWidth} border-black mb-6 flex justify-between items-center ${THEME.shadow}`}>
+                                    <div>
+                                        <h2 className={`text-3xl ${THEME.fontHead} font-bold uppercase tracking-tight flex items-center gap-3`}><MapPin className="text-retroOrange" /> Sector Scan</h2>
+                                    </div>
+                                    <div className="text-xs font-mono border border-cream px-2 py-1">LIVE FEED</div>
+                                </div>
+                                <div className={`relative bg-cream ${THEME.borderWidth} border-black h-[600px] overflow-hidden ${THEME.shadow}`}>
+                                    <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: `linear-gradient(black 1px, transparent 1px), linear-gradient(90deg, black 1px, transparent 1px)`, backgroundSize: '50px 50px' }}></div>
+                                    <div className="absolute inset-0 border-[50px] border-black/5 rounded-full pointer-events-none top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%]"></div>
+                                    <div className="absolute top-1/2 left-1/2 w-[50%] h-[2px] bg-retroOrange origin-left animate-[spin_4s_linear_infinite] opacity-50 shadow-[0_0_20px_#FF4F00]"></div>
+                                    {[{ x: 20, y: 30, name: "Salt Lake", count: 12 }, { x: 50, y: 50, name: "Park Street", count: 5 }, { x: 70, y: 20, name: "New Town", count: 24 }, { x: 30, y: 70, name: "Jadavpur", count: 18 }, { x: 60, y: 80, name: "Joka", count: 8 }].map((loc, i) => (
+                                        <div key={i} onClick={() => handleMapClick(loc.name)} className="absolute transform -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-20" style={{ left: `${loc.x}%`, top: `${loc.y}%` }}>
+                                            <div className="relative">
+                                                <div className="w-8 h-8 bg-retroOrange border-2 border-black animate-ping absolute top-0 left-0 rounded-full opacity-30"></div>
+                                                <div className="w-8 h-8 bg-black text-cream border-2 border-white flex items-center justify-center font-bold text-xs relative z-10 hover:bg-retroOrange hover:text-black transition-colors hover:scale-110 duration-200">{loc.count}</div>
+                                                <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white border-2 border-black px-2 py-1 text-[10px] font-bold uppercase whitespace-nowrap shadow-[2px_2px_0px_0px_black]">{loc.name}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {currentView === "HOME" && (
+                            <>
+                                <header className={`px-4 max-w-7xl mx-auto min-h-[70vh] flex flex-col justify-center border-x-[3px] border-black bg-cream relative overflow-hidden`}>
+                                    <div className="grid md:grid-cols-12 gap-12 items-center py-12 md:py-20 relative z-10">
+                                        <div className="md:col-span-7 text-left pl-4 md:pl-8">
+                                            <div className="inline-flex items-center gap-2 bg-black text-white px-4 py-2 font-mono text-xs uppercase tracking-widest mb-6 border-2 border-transparent shadow-[4px_4px_0px_0px_#FF4F00]">
+                                                <span className="w-2 h-2 bg-retroOrange rounded-full animate-pulse"></span>Kolkata's Exclusive Network
+                                            </div>
+                                            <h1 className={`text-6xl md:text-8xl ${THEME.fontHead} font-black leading-[0.9] mb-8 tracking-tighter text-black`}>
+                                                FIND YOUR <br/> <span className="relative inline-block text-cream px-4 bg-black transform -skew-x-6 hover:skew-x-0 transition-transform duration-300 cursor-default">ADDA MATE</span>
+                                            </h1>
+                                            <p className={`text-lg md:text-2xl ${THEME.fontHead} font-medium text-gray-800 mb-10 max-w-lg leading-relaxed border-l-4 border-retroOrange pl-6`}>No brokers. No spam. <br/> Just verified students from Jadavpur, Xavier's, Presi & more.</p>
+                                            <div className="flex flex-col sm:flex-row gap-4 items-start">
+                                                <Button primary onClick={() => document.getElementById('listings').scrollIntoView({ behavior: 'smooth' })} icon={ArrowRight}>Start Matching</Button>
+                                                <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest mt-3 sm:mt-0 px-4 py-3 border-2 border-black bg-white"><CheckCircle size={14} className="text-retroOrange" /> 1,204 Active Students</div>
+                                            </div>
+                                        </div>
+                                        <div className="md:col-span-5 relative hidden md:block pr-8">
+                                            <div className={`bg-white border-[3px] border-black p-4 pb-12 shadow-[12px_12px_0px_0px_#000000] rotate-2 transition-transform hover:rotate-0 duration-500 group`}>
+                                                <div className="bg-cream border-2 border-black h-96 flex flex-col items-center relative overflow-hidden">
+                                                    <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle, #000 2px, transparent 2.5px)', backgroundSize: '12px 12px'}}></div>
+                                                    <div className="absolute top-4 right-4 z-20"><Star fill="black" size={40} className="text-retroOrange animate-spin-slow" /></div>
+                                                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=KolkataVibes" alt="Avatar" className="w-48 h-48 mt-12 mb-6 drop-shadow-[4px_4px_0px_rgba(0,0,0,1)] grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500" />
+                                                    <div className="bg-black text-white w-full py-2 text-center font-mono font-bold uppercase text-xl absolute bottom-12 border-y-2 border-white transform -skew-x-12 scale-110">Matching...</div>
+                                                </div>
+                                                <div className="absolute bottom-4 right-4 font-mono text-xs font-bold uppercase tracking-widest">Fig. 1.0</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </header>
+                                <div className="bg-black text-cream py-2 overflow-hidden border-y-[3px] border-black relative z-20">
+                                    <div className="animate-marquee whitespace-nowrap flex gap-12 font-mono text-xs uppercase font-bold tracking-widest">
+                                        {Array(10).fill("⚡ NO BROKERS ALLOWED ⚡ KOLKATA STUDENTS ONLY ⚡ VERIFIED .EDU IDS").map((t, i) => <span key={i}>{t}</span>)}
+                                    </div>
+                                </div>
+                                <div id="listings" className="bg-white border-b-[3px] border-black sticky top-0 z-30">
+                                    <div className="max-w-7xl mx-auto px-4 py-4">
+                                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                                            <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase"><Filter size={14} /> Filter By:</div>
+                                            <div className="flex flex-wrap justify-center gap-4">
+                                                {[{ id: "ALL", label: "All Profiles", icon: Search }, { id: "VEG", label: "Vegetarian", icon: null }, { id: "NIGHT", label: "Night Owls", icon: Moon }].map((f) => (
+                                                    <button key={f.id} onClick={() => { setFilter(f.id); setLocationFilter("ALL"); }} className={`flex items-center gap-2 px-6 py-2 border-2 border-black font-bold uppercase text-xs font-mono transition-all hover:-translate-y-1 ${filter === f.id ? "bg-black text-cream shadow-[4px_4px_0px_0px_#FF4F00]" : "bg-cream text-black"}`}>{f.icon && <f.icon size={14} />}{f.label}</button>
+                                                ))}
+                                            </div>
+                                            {locationFilter !== "ALL" && <div className="bg-retroOrange text-black px-4 py-1 font-bold text-xs uppercase flex items-center gap-2 border-2 border-black">Area: {locationFilter} <button onClick={() => setLocationFilter("ALL")}><X size={12}/></button></div>}
+                                        </div>
+                                    </div>
+                                </div>
+                                <main className={`max-w-7xl mx-auto px-4 py-16 border-x-[3px] border-black bg-cream`}>
+                                    <div className="mb-12 flex items-center gap-4">
+                                        <div className="w-4 h-4 bg-black"></div>
+                                        <h2 className={`text-4xl ${THEME.fontHead} font-black uppercase tracking-tighter`}>Fresh Listings</h2>
+                                        <div className="flex-1 h-[2px] bg-black"></div>
+                                        <span className="font-mono text-xs font-bold uppercase">{filtered.length} Results</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                                        {filtered.map((person) => (
+                                            <div key={person.id} className={`group bg-white ${THEME.borderWidth} border-black p-0 flex flex-col relative transition-all hover:-translate-y-2 hover:shadow-[10px_10px_0px_0px_#000]`}>
+                                                <div className="flex justify-between items-center p-3 border-b-2 border-black bg-cream">
+                                                    <span className="font-mono text-[10px] uppercase font-bold tracking-widest flex items-center gap-1"><GraduationCap size={12}/> {person.college}</span>
+                                                    <button onClick={(e) => { e.stopPropagation(); showToast("Saved to Favorites"); }} className="hover:text-retroOrange"><Heart size={16} /></button>
+                                                </div>
+                                                <div onClick={() => setSelectedProfile(person)} className="cursor-pointer relative h-56 border-b-2 border-black overflow-hidden bg-gray-100 p-4">
+                                                    <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '8px 8px'}}></div>
+                                                    <img src={person.img} alt={person.name} className="w-full h-full object-contain transform group-hover:scale-110 transition-transform duration-500 grayscale group-hover:grayscale-0" />
+                                                    <div className="absolute top-2 right-2 bg-black text-white px-2 py-1 text-xs font-bold font-mono">{person.rent}</div>
+                                                </div>
+                                                <div className="p-5 flex-1 flex flex-col">
+                                                    <div className="flex justify-between items-end mb-2">
+                                                        <h3 className={`text-2xl ${THEME.fontHead} font-black uppercase`}>{person.name}, <span className="text-gray-500">{person.age}</span></h3>
+                                                        <span className="text-xs font-bold uppercase bg-gray-200 px-2 py-1">{person.location}</span>
+                                                    </div>
+                                                    <p className="text-sm font-mono text-gray-700 mb-6 leading-relaxed border-l-2 border-retroOrange pl-3 line-clamp-2">"{person.bio}"</p>
+                                                    <div className="flex flex-wrap gap-2 mt-auto mb-6">{person.tags.map(tag => <span key={tag} className="text-[10px] font-bold uppercase border border-black px-2 py-1 bg-cream">{tag}</span>)}</div>
+                                                    <button onClick={() => setSelectedProfile(person)} className="w-full bg-transparent text-black border-2 border-black py-3 font-bold uppercase text-sm tracking-widest hover:bg-black hover:text-cream transition-colors flex items-center justify-center gap-2 group-hover:bg-retroOrange group-hover:border-black group-hover:text-black">View Details <ArrowRight size={16} /></button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </main>
+                            </>
+                        )}
+                    </div>
+
+                    <footer className="bg-black text-cream border-t-[3px] border-black py-16">
+                        <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12">
+                            <div>
+                                <h2 className={`text-6xl ${THEME.fontHead} font-black uppercase tracking-tighter mb-6 text-retroOrange`}>FlatMate.in</h2>
+                                <p className="font-mono text-xs max-w-sm leading-relaxed text-gray-400">// SYSTEM STATUS: ONLINE<br/>// LOCATION: KOLKATA, INDIA<br/>// MISSION: ELIMINATE BROKERS</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-8 font-mono text-xs uppercase tracking-widest">
+                                <div className="opacity-50 hover:opacity-100 cursor-pointer">Made for students, by students<br/>v2.0.4 [Stable]</div>
+                            </div>
+                        </div>
+                    </footer>
+
+                    <Modal isOpen={!!selectedProfile} onClose={() => { setSelectedProfile(null); setShowPaywall(false); }} title={selectedProfile?.name || "Profile"} maxWidth="max-w-2xl">
+                        {selectedProfile && !showPaywall && (
+                            <div className="flex flex-col md:flex-row gap-8">
+                                <div className="w-full md:w-1/3 bg-gray-100 border-2 border-black p-4 flex items-center justify-center"><img src={selectedProfile.img} alt={selectedProfile.name} className="w-32 h-32 md:w-full md:h-auto object-contain grayscale" /></div>
+                                <div className="flex-1">
+                                    <div className="flex flex-wrap gap-2 mb-4"><span className="bg-retroOrange text-black px-2 py-1 text-xs font-bold uppercase border border-black">{selectedProfile.college}</span><span className="bg-black text-white px-2 py-1 text-xs font-bold uppercase border border-black">{selectedProfile.location}</span></div>
+                                    <h3 className="font-bold text-lg uppercase mb-2 border-b-2 border-black inline-block">Habit Check</h3>
+                                    <div className="grid grid-cols-3 gap-4 mb-6">
+                                        <div className="text-center p-2 border border-black bg-gray-50"><div className="font-mono text-[10px] text-gray-500 uppercase">Smoking</div><div className="font-bold">{selectedProfile.habits.smoke ? "YES" : "NO"}</div></div>
+                                        <div className="text-center p-2 border border-black bg-gray-50"><div className="font-mono text-[10px] text-gray-500 uppercase">Drinking</div><div className="font-bold">{selectedProfile.habits.drink ? "YES" : "NO"}</div></div>
+                                        <div className="text-center p-2 border border-black bg-gray-50"><div className="font-mono text-[10px] text-gray-500 uppercase">Guests</div><div className="font-bold text-xs">{selectedProfile.habits.guests}</div></div>
+                                    </div>
+                                    <p className="font-mono text-sm mb-6 border-l-4 border-retroOrange pl-4 italic">"{selectedProfile.bio}"</p>
+                                    <div className="bg-gray-100 border-2 border-dashed border-black p-4 text-center cursor-not-allowed relative overflow-hidden group" onClick={() => setShowPaywall(true)}>
+                                        <div className="filter blur-sm select-none"><h4 className="font-bold">+91 98765 XXXXX</h4><p>email@college.edu.in</p></div>
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors"><button className="bg-black text-cream px-4 py-2 font-bold uppercase text-xs shadow-[4px_4px_0px_0px_#FF4F00]">Reveal Contact</button></div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        {showPaywall && (
+                           <div className="text-center animate-in zoom-in duration-300">
+                             <div className="w-20 h-20 bg-retroOrange mx-auto mb-4 border-[3px] border-black flex items-center justify-center shadow-[6px_6px_0px_0px_#000]"><Lock size={32} className="text-black" /></div>
+                             <h3 className={`text-2xl ${THEME.fontHead} font-black uppercase mb-2`}>Safety First</h3>
+                             <p className="text-sm font-mono text-gray-600 mb-6 px-8">We verify every student to keep FlatMate.in safe and broker-free.</p>
+                             <div className="bg-cream border-2 border-black p-4 mb-6 text-left relative mx-auto max-w-sm"><div className="absolute -top-3 -right-3 bg-black text-white text-[10px] font-mono font-bold px-2 py-1 transform rotate-3">LIFETIME ACCESS</div><h4 className="font-black text-xl uppercase">Premium Pass</h4><div className="text-4xl font-black mt-2 font-mono">₹199</div></div>
+                             <Button primary className="w-full py-4 text-lg" onClick={() => { setShowPaywall(false); showToast("Payment Gateway Mock"); }}>Unlock Now</Button>
+                             <button onClick={() => setShowPaywall(false)} className="mt-4 text-xs font-bold underline hover:text-retroOrange">Go Back</button>
+                           </div>
+                        )}
+                    </Modal>
+                </div>
+            );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<FlatMateApp />);
+    </script>
+</body>
+</html>
